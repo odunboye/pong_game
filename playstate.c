@@ -25,42 +25,42 @@ enum
     BG_A = 255
 };
 
-void playstate_init(struct PlayState *p, const Dimensions *frame, struct Racket player, struct Racket enemy, struct PongBall pongball)
+void playstate_init(PlayState *this, const Dimensions *frame, struct Racket player, struct Racket enemy, struct PongBall pongball)
 {
-    p->frame = frame;
-    p->player = player;
-    p->enemy = enemy;
-    p->player.y = frame->height / 2.0f - player.height / 2.0f;
-    p->enemy.y = frame->height / 2.0f - enemy.height / 2.0f;
-    p->ball = pongball;
-    p->ball.within = frame;
-    pongball_reset(&p->ball);
-    p->score = (struct Score){
+    this->frame = frame;
+    this->player = player;
+    this->enemy = enemy;
+    this->player.y = frame->height / 2.0f - player.height / 2.0f;
+    this->enemy.y = frame->height / 2.0f - enemy.height / 2.0f;
+    this->ball = pongball;
+    this->ball.within = frame;
+    pongball_reset(&this->ball);
+    this->score = (struct Score){
         .player = 0,
         .enemy = 0};
 }
 
-void playstate_play(struct PlayState *p, Uint32 now_ms)
+void playstate_play(PlayState *this, Uint32 now_ms)
 {
     Uint32 delta_ms;
 
-    delta_ms = now_ms - p->last_update_ms;
+    delta_ms = now_ms - this->last_update_ms;
 
-    playstate_run_collisions(p, delta_ms);
-    playstate_play_enemy(p);
-    playstate_play_movements(p, delta_ms);
-    p->last_update_ms = now_ms;
+    this->playstate_run_collisions(this, delta_ms);
+    this->playstate_play_enemy(this);
+    this->playstate_play_movements(this, delta_ms);
+    this->last_update_ms = now_ms;
 }
 /**
  * Checks if there will be any collisions if a movement happens given the
  * current play state.
  */
-void playstate_run_collisions(struct PlayState *p, Uint32 delta_ms)
+void playstate_run_collisions(PlayState *this, Uint32 delta_ms)
 {
     struct PongBall *ball;
     float xp, yp; // These are x prime and y prime, the next (x,y) for ball.
 
-    ball = &p->ball;
+    ball = &this->ball;
     // xp = ball->x + ball->dx * delta_ms * PONG_BALL_MS_SPEED;
     xp = ball->x + ball->dx * delta_ms * ball->speed_ms;
     // yp = ball->y + ball->dy * delta_ms * PONG_BALL_MS_SPEED;
@@ -68,86 +68,86 @@ void playstate_run_collisions(struct PlayState *p, Uint32 delta_ms)
 
     // A ball can collide with the top/bottom walls, in which case its dy changes
     // sign.
-    if (yp > p->frame->height - p->ball.size || yp < 0.0f)
+    if (yp > this->frame->height - this->ball.size || yp < 0.0f)
     {
         ball->dy = -ball->dy;
     }
 
     // If a ball reaches the region before any racket...
-    if (xp < p->player.width)
+    if (xp < this->player.width)
     { // player
-        if (!playstate_yhits_racket(ball, &p->player))
+        if (!this->playstate_yhits_racket(ball, &this->player))
         {
-            pongball_score(ball, &p->score.enemy);
+            pongball_score(ball, &this->score.enemy);
         }
     }
-    else if (xp > p->frame->width - p->enemy.width - p->ball.size)
+    else if (xp > this->frame->width - this->enemy.width - this->ball.size)
     { // enemy
-        if (!playstate_yhits_racket(ball, &p->enemy))
+        if (!this->playstate_yhits_racket(ball, &this->enemy))
         {
-            pongball_score(ball, &p->score.player);
+            pongball_score(ball, &this->score.player);
         }
     }
 }
 
-void playstate_play_movements(struct PlayState *p, Uint32 delta_ms)
+void playstate_play_movements(PlayState *this, Uint32 delta_ms)
 {
-    racket_move(&p->player, delta_ms, p->frame->height - p->player.height);
-    racket_move(&p->enemy, delta_ms, p->frame->height - p->enemy.height);
-    pongball_move(&p->ball, delta_ms);
+    racket_move(&this->player, delta_ms, this->frame->height - this->player.height);
+    racket_move(&this->enemy, delta_ms, this->frame->height - this->enemy.height);
+    pongball_move(&this->ball, delta_ms);
 }
 
-void playstate_handle_event(struct PlayState *p, SDL_Event *e)
+void playstate_handle_event(PlayState *this, SDL_Event *e)
 {
     if (e->type == SDL_KEYDOWN)
     {
         switch (e->key.keysym.sym)
         {
         case SDLK_UP:
-            p->player.dy = -1;
+            this->player.dy = -1;
             return;
         case SDLK_DOWN:
-            p->player.dy = 1;
+            this->player.dy = 1;
             return;
         }
     }
-    p->player.dy = 0;
+    this->player.dy = 0;
 }
 
-void playstate_reset(struct PlayState *p)
+void playstate_reset(PlayState *this)
 {
-    p->last_update_ms = SDL_GetTicks();
-    playstate_init(p, p->frame, p->player, p->enemy, p->ball);
+    this->last_update_ms = SDL_GetTicks();
+    playstate_init(this, this->frame, this->player, this->enemy, this->ball);
 }
 
-void playstate_render(SDL_Renderer *r, const struct PlayState *p)
+void playstate_render(SDL_Renderer *r, const PlayState *this)
 {
     SDL_SetRenderDrawColor(r, BG_R, BG_G, BG_B, BG_A);
     SDL_RenderClear(r);
     SDL_SetRenderDrawColor(r, FG_R, FG_G, FG_B, FG_A);
-    racket_render(r, 0, p->player.y, p->player.width, p->player.height);
-    racket_render(r, p->frame->width - p->enemy.width, p->enemy.y, p->enemy.width, p->enemy.height);
-    pongball_render(r, &p->ball);
-    render_midline(r, p->frame);
-    render_score(r, &p->score, p->frame);
+    racket_render(r, 0, this->player.y, this->player.width, this->player.height);
+    racket_render(r, this->frame->width - this->enemy.width, this->enemy.y, this->enemy.width, this->enemy.height);
+    pongball_render(r, &this->ball);
+    render_midline(r, this->frame);
+    render_score(r, &this->score, this->frame);
     SDL_RenderPresent(r);
 }
 
-void playstate_play_enemy(struct PlayState *p)
+void playstate_play_enemy(PlayState *this)
 {
     float pong_middle_y, middle_y, diff, abs_diff;
 
-    middle_y = p->enemy.y + p->enemy.height / 2.0f;
-    pong_middle_y = p->ball.y + (p->ball.size) / 2.0f;
+    middle_y = this->enemy.y + this->enemy.height / 2.0f;
+    pong_middle_y = this->ball.y + (this->ball.size) / 2.0f;
     diff = middle_y - pong_middle_y;
     abs_diff = fabsf(diff);
     if (abs_diff <= ENEMY_WAIT_TOLERANCE)
     {
-        p->enemy.dy = 0;
+        this->enemy.dy = 0;
     }
     else
     {
-        p->enemy.dy = -diff / abs_diff;
+        this->enemy.dy = -diff / abs_diff;
     }
 }
 
@@ -191,4 +191,19 @@ int playstate_yhits_racket(struct PongBall *ball, const struct Racket *racket)
     ball->dx = ball->dx < 0 ? cosf(angle) : -cosf(angle);
 
     return 1;
+}
+
+PlayState new_playState()
+{
+    PlayState this = {.playstate_init = playstate_init,
+                      .playstate_play = playstate_play,
+                      .playstate_run_collisions = playstate_run_collisions,
+                      .playstate_play_movements = playstate_play_movements,
+                      .playstate_handle_event = playstate_handle_event,
+                      .playstate_reset = playstate_reset,
+                      .playstate_render = playstate_render,
+                      .playstate_play_enemy = playstate_play_enemy,
+                      .playstate_yhits_racket = playstate_yhits_racket};
+
+    return this;
 }

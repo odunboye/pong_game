@@ -16,7 +16,7 @@ void game_run(Game *this, const char *title, Racket player, Racket enemy, PongBa
         return;
     }
 
-    playstate_init(&this->play, &this->video.dim, player, enemy, pongball);
+    this->play.playstate_init(&this->play, &this->video.dim, player, enemy, pongball);
     this->game_main(this);
     this->game_quit(this);
 }
@@ -43,10 +43,10 @@ void game_main(Game *this)
             {
                 return;
             }
-            playstate_handle_event(&this->play, &e);
+            this->play.playstate_handle_event(&this->play, &e);
         }
-        playstate_play(&this->play, SDL_GetTicks());
-        playstate_render(this->video.renderer, &this->play);
+        this->play.playstate_play(&this->play, SDL_GetTicks());
+        this->play.playstate_render(this->video.renderer, &this->play);
         delta_ms = SDL_GetTicks() - last_ms;
         if (delta_ms < MAX_WAIT_MS)
         {
@@ -68,11 +68,11 @@ void game_check_finish_round(Game *this)
             "End Round",
             s->player >= END_SCORE ? "You won! Go another round." : "You lost. Try again.",
             this->video.window);
-        playstate_reset(&this->play);
+        this->play.playstate_reset(&this->play);
     }
 }
 
-void game_quit(struct Game *this)
+void game_quit(Game *this)
 {
     SDL_DestroyRenderer(this->video.renderer);
     SDL_DestroyWindow(this->video.window);
@@ -89,6 +89,8 @@ Game *new_game(Dimensions dim)
     game->game_quit = game_quit;
 
     game->video.dim = dim;
+
+    game->play = new_playState();
 
     return game;
 }
