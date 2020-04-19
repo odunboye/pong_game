@@ -26,6 +26,6 @@ typedef struct PlayState
     int (*playstate_yhits_racket)(struct PongBall *ball, const struct Racket *racket);
 } PlayState;
 
-PlayState new_playState();
+PlayState *new_playState();
 
 #endif

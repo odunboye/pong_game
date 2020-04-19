@@ -16,7 +16,7 @@ void game_run(Game *this, const char *title, Racket player, Racket enemy, PongBa
         return;
     }
 
-    this->play.playstate_init(&this->play, &this->video.dim, player, enemy, pongball);
+    this->playState->playstate_init(this->playState, &this->video.dim, player, enemy, pongball);
     this->game_main(this);
     this->game_quit(this);
 }
@@ -33,7 +33,7 @@ void game_main(Game *this)
     SDL_Event e;
     Uint32 last_ms, delta_ms;
 
-    this->play.last_update_ms = SDL_GetTicks();
+    this->playState->last_update_ms = SDL_GetTicks();
     for (;;)
     {
         last_ms = SDL_GetTicks();
@@ -43,10 +43,10 @@ void game_main(Game *this)
             {
                 return;
             }
-            this->play.playstate_handle_event(&this->play, &e);
+            this->playState->playstate_handle_event(this->playState, &e);
         }
-        this->play.playstate_play(&this->play, SDL_GetTicks());
-        this->play.playstate_render(this->video.renderer, &this->play);
+        this->playState->playstate_play(this->playState, SDL_GetTicks());
+        this->playState->playstate_render(this->video.renderer, this->playState);
         delta_ms = SDL_GetTicks() - last_ms;
         if (delta_ms < MAX_WAIT_MS)
         {
@@ -60,7 +60,7 @@ void game_check_finish_round(Game *this)
 {
     struct Score *s;
 
-    s = &this->play.score;
+    s = &this->playState->score;
     if (s->player >= END_SCORE || s->enemy >= END_SCORE)
     {
         SDL_ShowSimpleMessageBox(
@@ -68,7 +68,7 @@ void game_check_finish_round(Game *this)
             "End Round",
             s->player >= END_SCORE ? "You won! Go another round." : "You lost. Try again.",
             this->video.window);
-        this->play.playstate_reset(&this->play);
+        this->playState->playstate_reset(this->playState);
     }
 }
 
@@ -90,7 +90,7 @@ Game *new_game(Dimensions dim)
 
     game->video.dim = dim;
 
-    game->play = new_playState();
+    game->playState = new_playState();
 
     return game;
 }

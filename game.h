@@ -7,7 +7,7 @@
 typedef struct Game
 {
     struct Video video;
-    PlayState play;
+    PlayState *playState;
 
     void (*game_run)(struct Game *g, const char *title, Racket player, Racket enemy, PongBall pongball);
     void (*game_main)(struct Game *g);

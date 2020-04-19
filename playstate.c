@@ -193,17 +193,20 @@ int playstate_yhits_racket(struct PongBall *ball, const struct Racket *racket)
     return 1;
 }
 
-PlayState new_playState()
+PlayState *new_playState()
 {
-    PlayState this = {.playstate_init = playstate_init,
-                      .playstate_play = playstate_play,
-                      .playstate_run_collisions = playstate_run_collisions,
-                      .playstate_play_movements = playstate_play_movements,
-                      .playstate_handle_event = playstate_handle_event,
-                      .playstate_reset = playstate_reset,
-                      .playstate_render = playstate_render,
-                      .playstate_play_enemy = playstate_play_enemy,
-                      .playstate_yhits_racket = playstate_yhits_racket};
 
-    return this;
+    PlayState *playState = calloc(sizeof(*playState), 1);
+
+    playState->playstate_init = playstate_init;
+    playState->playstate_play = playstate_play;
+    playState->playstate_run_collisions = playstate_run_collisions;
+    playState->playstate_play_movements = playstate_play_movements;
+    playState->playstate_handle_event = playstate_handle_event;
+    playState->playstate_reset = playstate_reset;
+    playState->playstate_render = playstate_render;
+    playState->playstate_play_enemy = playstate_play_enemy;
+    playState->playstate_yhits_racket = playstate_yhits_racket;
+
+    return playState;
 }
