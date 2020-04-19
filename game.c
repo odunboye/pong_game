@@ -2,13 +2,13 @@
 #include <assert.h>
 
 #include "game.h"
+
 #include "error_constants.h"
 #include "racket.h"
 #include "pongball.h"
 #include "util.h"
 
 /** Size values are in pixels by default, unless specified otheriwse. */
-
 enum
 {
     RACKET_WIDTH = 20,
@@ -26,9 +26,6 @@ enum
 
 const float PONG_BALL_MS_SPEED = PONG_BALL_SPEED / 1000.0f;
 
-// The maximum distance of middles of racket and ball within a hit.
-// const float MAX_HIT_DISTANCE = RACKET_HEIGHT / 2.0f + PONG_BALL_SIZE / 2.0f;
-
 void game_run(struct Game *g, const char *title)
 {
 
@@ -42,8 +39,8 @@ void game_run(struct Game *g, const char *title)
     struct Racket enemy = {.y = 0, .dy = 0, .width = RACKET_WIDTH, .height = RACKET_HEIGHT, .speed = RACKET_SPEED, .speed_ms = RACKET_MS_SPEED, .hitback_max_angle = 85.0f * M_PI / 180.0f};
     struct PongBall ball = {.x = 0.0, .y = 0.0, .dx = 0.0, .dy = 0.0, .speed = PONG_BALL_SPEED, .speed_ms = PONG_BALL_MS_SPEED, .size = PONG_BALL_SIZE};
     playstate_init(&g->play, &g->video.dim, player, enemy, ball);
-    game_main(g);
-    game_quit(g);
+    g->game_main(g);
+    g->game_quit(g);
 }
 
 void game_main(struct Game *g)
@@ -77,7 +74,7 @@ void game_main(struct Game *g)
         {
             SDL_Delay(MAX_WAIT_MS - delta_ms);
         }
-        game_check_finish_round(g);
+        g->game_check_finish_round(g);
     }
 }
 
@@ -102,4 +99,18 @@ void game_quit(struct Game *g)
     SDL_DestroyRenderer(g->video.renderer);
     SDL_DestroyWindow(g->video.window);
     SDL_Quit();
+}
+
+Game *new_game(struct Dimensions dim)
+{
+    Game *game = calloc(sizeof(*game), 1);
+
+    game->game_run = game_run;
+    game->game_main = game_main;
+    game->game_check_finish_round = game_check_finish_round;
+    game->game_quit = game_quit;
+
+    game->video.dim = dim;
+
+    return game;
 }

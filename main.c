@@ -9,13 +9,9 @@ int main(int argc, char *argv[])
     (void)argv;
 
     const char *TITLE = "PONG";
+    Game *game = new_game((struct Dimensions){.width = 640, .height = 480});
 
-    struct Game game;
-    game.video.dim = (struct Dimensions){
-        .width = 640,
-        .height = 480};
-
-    game_run(&game, TITLE);
+    game->game_run(game, TITLE);
     if (errorFn)
     {
         fprintf(stderr, "Error: %s\n", errorFn());
