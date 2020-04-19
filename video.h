@@ -9,7 +9,7 @@ struct Video
 {
     SDL_Window *window;
     SDL_Renderer *renderer;
-    struct Dimensions dim;
+    Dimensions dim;
 };
 
 void video_init(struct Video *gv, const char *title);

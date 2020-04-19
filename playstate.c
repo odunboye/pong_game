@@ -25,7 +25,7 @@ enum
     BG_A = 255
 };
 
-void playstate_init(struct PlayState *p, const struct Dimensions *frame, struct Racket player, struct Racket enemy, struct PongBall pongball)
+void playstate_init(struct PlayState *p, const Dimensions *frame, struct Racket player, struct Racket enemy, struct PongBall pongball)
 {
     p->frame = frame;
     p->player = player;

@@ -8,42 +8,20 @@
 #include "pongball.h"
 #include "util.h"
 
-/** Size values are in pixels by default, unless specified otheriwse. */
-enum
+void game_run(Game *this, const char *title, Racket player, Racket enemy, PongBall pongball)
 {
-    RACKET_WIDTH = 20,
-    RACKET_HEIGHT = RACKET_WIDTH * 3,
-    RACKET_SPEED = 550 /* Pixels per second. */
-};
-
-const float RACKET_MS_SPEED = RACKET_SPEED / 1000.0f;
-
-enum
-{
-    PONG_BALL_SIZE = 20,
-    PONG_BALL_SPEED = 11 * (RACKET_SPEED / 10)
-};
-
-const float PONG_BALL_MS_SPEED = PONG_BALL_SPEED / 1000.0f;
-
-void game_run(struct Game *g, const char *title)
-{
-
-    video_init(&g->video, title);
+    video_init(&this->video, title);
     if (errorFn)
     {
         return;
     }
 
-    struct Racket player = {.y = 0, .dy = 0, .width = RACKET_WIDTH, .height = RACKET_HEIGHT, .speed = RACKET_SPEED, .speed_ms = RACKET_MS_SPEED, .hitback_max_angle = 85.0f * M_PI / 180.0f};
-    struct Racket enemy = {.y = 0, .dy = 0, .width = RACKET_WIDTH, .height = RACKET_HEIGHT, .speed = RACKET_SPEED, .speed_ms = RACKET_MS_SPEED, .hitback_max_angle = 85.0f * M_PI / 180.0f};
-    struct PongBall ball = {.x = 0.0, .y = 0.0, .dx = 0.0, .dy = 0.0, .speed = PONG_BALL_SPEED, .speed_ms = PONG_BALL_MS_SPEED, .size = PONG_BALL_SIZE};
-    playstate_init(&g->play, &g->video.dim, player, enemy, ball);
-    g->game_main(g);
-    g->game_quit(g);
+    playstate_init(&this->play, &this->video.dim, player, enemy, pongball);
+    this->game_main(this);
+    this->game_quit(this);
 }
 
-void game_main(struct Game *g)
+void game_main(Game *this)
 {
     enum
     {
@@ -55,7 +33,7 @@ void game_main(struct Game *g)
     SDL_Event e;
     Uint32 last_ms, delta_ms;
 
-    g->play.last_update_ms = SDL_GetTicks();
+    this->play.last_update_ms = SDL_GetTicks();
     for (;;)
     {
         last_ms = SDL_GetTicks();
@@ -65,43 +43,43 @@ void game_main(struct Game *g)
             {
                 return;
             }
-            playstate_handle_event(&g->play, &e);
+            playstate_handle_event(&this->play, &e);
         }
-        playstate_play(&g->play, SDL_GetTicks());
-        playstate_render(g->video.renderer, &g->play);
+        playstate_play(&this->play, SDL_GetTicks());
+        playstate_render(this->video.renderer, &this->play);
         delta_ms = SDL_GetTicks() - last_ms;
         if (delta_ms < MAX_WAIT_MS)
         {
             SDL_Delay(MAX_WAIT_MS - delta_ms);
         }
-        g->game_check_finish_round(g);
+        this->game_check_finish_round(this);
     }
 }
 
-void game_check_finish_round(struct Game *g)
+void game_check_finish_round(Game *this)
 {
     struct Score *s;
 
-    s = &g->play.score;
+    s = &this->play.score;
     if (s->player >= END_SCORE || s->enemy >= END_SCORE)
     {
         SDL_ShowSimpleMessageBox(
             SDL_MESSAGEBOX_INFORMATION,
             "End Round",
             s->player >= END_SCORE ? "You won! Go another round." : "You lost. Try again.",
-            g->video.window);
-        playstate_reset(&g->play);
+            this->video.window);
+        playstate_reset(&this->play);
     }
 }
 
-void game_quit(struct Game *g)
+void game_quit(struct Game *this)
 {
-    SDL_DestroyRenderer(g->video.renderer);
-    SDL_DestroyWindow(g->video.window);
+    SDL_DestroyRenderer(this->video.renderer);
+    SDL_DestroyWindow(this->video.window);
     SDL_Quit();
 }
 
-Game *new_game(struct Dimensions dim)
+Game *new_game(Dimensions dim)
 {
     Game *game = calloc(sizeof(*game), 1);
 

@@ -14,10 +14,10 @@ enum Direction
     RIGHT = 1
 };
 
-struct Dimensions
+typedef struct
 {
     int width, height;
-};
+} Dimensions;
 
 enum
 {
@@ -49,18 +49,18 @@ struct DigitRenderingContext
 
     // Dimensions within which the digit is being written. Serves to compute the
     // midline.
-    const struct Dimensions *within;
+    const Dimensions *within;
 };
 
-void render_score(SDL_Renderer *r, const struct Score *s, const struct Dimensions *screen);
+void render_score(SDL_Renderer *r, const struct Score *s, const Dimensions *screen);
 void render_single_score(SDL_Renderer *r,
                          int score,
                          struct DigitRenderingContext *cx);
 void render_digit(SDL_Renderer *r,
                   int digit,
                   const struct DigitRenderingContext *cx);
-void render_midline(SDL_Renderer *r, const struct Dimensions *screen);
-int midline_npoints(const struct Dimensions *screen);
+void render_midline(SDL_Renderer *r, const Dimensions *screen);
+int midline_npoints(const Dimensions *screen);
 float fclamp0(float x, float max);
 int is2digits(int x);
 #endif

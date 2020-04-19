@@ -65,7 +65,7 @@ const char SCORE_DIGITS[10][DIGIT_HEIGHT][DIGIT_WIDTH + 1] = {
      "    *"},
 };
 
-void render_score(SDL_Renderer *r, const struct Score *s, const struct Dimensions *screen)
+void render_score(SDL_Renderer *r, const struct Score *s, const Dimensions *screen)
 {
     struct DigitRenderingContext cx = {
         .x_offset = 0,
@@ -139,7 +139,7 @@ void render_digit(SDL_Renderer *r,
     }
 }
 
-void render_midline(SDL_Renderer *r, const struct Dimensions *screen)
+void render_midline(SDL_Renderer *r, const Dimensions *screen)
 {
     int npoints;
     SDL_Rect mpoint;
@@ -158,7 +158,7 @@ void render_midline(SDL_Renderer *r, const struct Dimensions *screen)
     }
 }
 
-int midline_npoints(const struct Dimensions *screen)
+int midline_npoints(const Dimensions *screen)
 {
     return 1 +
            (screen->height - MIDLINE_PADDING * 2 - MIDLINE_POINT_HEIGHT) /

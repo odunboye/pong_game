@@ -14,10 +14,10 @@ struct PlayState
     struct Score score;
 
     // Dimmensions of the frame within which the game is played.
-    const struct Dimensions *frame;
+    const Dimensions *frame;
 };
 
-void playstate_init(struct PlayState *p, const struct Dimensions *frame, struct Racket player, struct Racket enemy, struct PongBall pongball);
+void playstate_init(struct PlayState *p, const Dimensions *frame, struct Racket player, struct Racket enemy, struct PongBall pongball);
 void playstate_play(struct PlayState *p, Uint32 now_ms);
 void playstate_run_collisions(struct PlayState *p, Uint32 delta_ms);
 void playstate_play_movements(struct PlayState *p, Uint32 delta_ms);
